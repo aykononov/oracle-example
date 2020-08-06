@@ -1,0 +1,22 @@
+clear
+whenever sqlerror exit sql.sqlcode
+
+prompt started!
+
+@C:\TEMP\PACKAGE_01.pck;
+/
+@C:\TEMP\PROCEDURE_01.prc;
+/
+@C:\TEMP\FUNCTION_01.fnc;
+/
+@C:\TEMP\TRIGGER_01.trg;
+/
+@C:\TEMP\SEQUENCE_01.sql;
+/
+@C:\TEMP\VIEW_01.sql;
+/
+@C:\TEMP\TABLE_01.sql;
+/
+
+prompt finished!
+exit;
