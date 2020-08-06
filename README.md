@@ -1,3 +1,2 @@
-# PLSQL_Oracle
-Мои решения тестовых заданий: 
+# Мои решения тестовых заданий по Oracle (SQL, PL/SQL)...
 https://gist.github.com/aykononov
