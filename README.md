@@ -1,2 +1,1 @@
-# Мои решения тестовых заданий по Oracle (SQL, PL/SQL)...
-https://gist.github.com/aykononov
+[Мои решения тестовых заданий по Oracle (SQL, PL/SQL)...](https://gist.github.com/aykononov "Посмотреть пример Java")
