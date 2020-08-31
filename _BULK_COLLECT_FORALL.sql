@@ -7,7 +7,7 @@ BEGIN
   LOOP 
   UPDATE SCOTT.EMP
      SET sal   = sal + (sal * .01)
-         WHERE empno = i.empno;
+   WHERE empno = i.empno;
    dbms_output.put_line (i.empno);
   END LOOP;
   COMMIT;
@@ -17,16 +17,16 @@ END;
 /* =====================================================================
    Использование BULK COLLECT и FORALL 
    Внутри FORALL может быть только одни DML запрос. 
-   Если нужно несколько запросов, то нужно использовать несколько FORALL
+   
 */
 DECLARE
   -- Создаем тип ассоциативного массива,
-  -- где ЗНАЧЕНИЕ = SCOTT.EMP.empno%TYPE, а PLS_INTEGER это ключ.
+  -- где ЗНАЧЕНИЕ = SCOTT.EMP.empno%TYPE, а PLS_INTEGER это индекс (ключ).
   TYPE EMPNO_T IS TABLE OF SCOTT.EMP.empno%TYPE INDEX BY PLS_INTEGER;
-  -- Объявляем переменную l_empno типа EMPNO_T
+  -- Объявляем коллекцию типа на базе типа EMPNO_T
   l_empno EMPNO_T;
 BEGIN
-  -- Поместить все записи разом в коллекцию
+  -- Поместим дним разом все записи в коллекцию
   SELECT empno BULK COLLECT INTO l_empno FROM SCOTT.EMP;
   -- Конструкция FORALL выполняет весь UPDATE за один раз
   FORALL i IN 1 .. l_empno.COUNT
@@ -37,13 +37,16 @@ BEGIN
 END;
 
 
-/* Создаем структуру для обновления двух таблиц */
+/* Если нужно нужно выполнить несколько запросов, 
+   то придется использовать несколько FORALL
+*/	 
+--Для примера, создаем структуру для обновления двух таблиц
 CREATE TABLE SCOTT.EMP1 AS (SELECT * FROM SCOTT.EMP);
 CREATE TABLE SCOTT.EMP2 AS (SELECT * FROM SCOTT.EMP);
 --DROP TABLE SCOTT.EMP1 PURGE;
 --DROP TABLE SCOTT.EMP2 PURGE;
 
-/* Обновляем сразу в двух таблицах*/
+-- Обновляем сразу в двух таблицах
 DECLARE
   TYPE EMPNO_T IS TABLE OF SCOTT.EMP1.empno%TYPE INDEX BY PLS_INTEGER;
   TYPE SAL_T   IS TABLE OF SCOTT.EMP1.sal%TYPE;
@@ -126,7 +129,6 @@ SELECT t.empno, t.sal, t1.sal AS sal_1, t2.sal AS sal2
 
 /* ====================================================================== */
 
-
 Если выборка большого количества данных и помещение их в переменную PL/SQL важнее,
 чем циклический проход по результирующей выборке, то можно использовать BULK COLLECT . 
 
@@ -144,26 +146,26 @@ DECLARE
  ids   IdsTab;
  names NameTab;
  CURSOR c1 IS
- SELECT employee_id, last_name
+  SELECT employee_id, last_name
     FROM employees
-  WHERE job_id = 'ST_CLERK';
+   WHERE job_id = 'ST_CLERK';
 BEGIN
- OPEN c1;
+	OPEN c1;
  FETCH c1 BULK COLLECT INTO ids, names;
- CLOsE c1;
--- Обработка элементов коллекции
-FOR i IN ids.FIRST..ids.LAST
-LOOP
-  IF ids(i) > 140 THEN
-   DBMS_OUTPUT.PUT_LINE(ids(i));
-  END IF;
-END LOOP;
-FOR i IN names.FIRST..names.LAST
-LOOP
-  IF names(i) LIKE '%Ma%' THEN
-   DBMS_OUTPUT.PUT_LINE(names(i));
-  END IF;
-END LOOP;
+ CLOSE c1;
+	-- Обработка элементов коллекции
+	FOR i IN ids.FIRST..ids.LAST
+	LOOP
+		IF ids(i) > 140 THEN
+		 DBMS_OUTPUT.PUT_LINE(ids(i));
+		END IF;
+	END LOOP;
+	FOR i IN names.FIRST..names.LAST
+	LOOP
+		IF names(i) LIKE '%Ma%' THEN
+		 DBMS_OUTPUT.PUT_LINE(names(i));
+		END IF;
+	END LOOP;
 END;
 /
 Эта технология может быть не только очень быстрой, но и требовательной к памяти.
@@ -214,16 +216,16 @@ ORDER BY salary DESC;
 -- А сейчас мы сделаем выборку только по некоторым полям таблицы.
 -- Получим фамилию и имя десяти случайных сотрудников.
 
- SELECT first_name, last_name BULK COLLECT
+  SELECT first_name, last_name BULK COLLECT
     INTO some_names
     FROM employees
    WHERE ROWNUM < 11;
 
-FOR i IN some_names.FIRST..some_names.LAST
-LOOP
-  DBMS_OUTPUT.PUT_LINE('Employee = ' || some_names(i).first_name || ' ' ||
-  some_names(i).last_name);
-END LOOP;
+	FOR i IN some_names.FIRST..some_names.LAST
+	LOOP
+		DBMS_OUTPUT.PUT_LINE('Employee = ' || some_names(i).first_name || ' ' ||
+		some_names(i).last_name);
+	END LOOP;
 END;
 /
 
@@ -261,7 +263,8 @@ BEGIN
 -- Извлечение данных по сотрудникам, идентификатор которых больше 1000
 
 SELECT employee_id, last_name BULK COLLECT
-   INTO enums, names FROM employees
+  INTO enums, names 
+	FROM employees
  WHERE employee_id > 1000;
 
 -- Все данные помещены в память выражением BULK COLLECT
@@ -271,11 +274,11 @@ print_results();
 
 -- Выборка приблизительно 20% всех рядов
 
-SELECT employee_id, last_name BULK COLLECT
+ SELECT employee_id, last_name BULK COLLECT
    INTO enums, names
    FROM employees SAMPLE (20);
 
-print_results();
+ print_results();
 END;
 /
 
@@ -297,7 +300,7 @@ DECLARE
  sals SalList;
 BEGIN
 -- Ограничение числа выбираемых записей до 50
-SELECT salary BULK COLLECT
+ SELECT salary BULK COLLECT
    INTO sals
    FROM employees
   WHERE ROWNUM <= 50;
@@ -317,7 +320,7 @@ DECLARE
  TYPE SalList  IS TABLE OF employees.salary%TYPE;
  CURSOR c1 IS
   SELECT last_name, salary
-     FROM employees
+    FROM employees
    WHERE salary > 10000;
  names NameList;
  sals  SalList;
