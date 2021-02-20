@@ -5,17 +5,18 @@
 -- самый простой способ
 BEGIN
   FOR i IN (SELECT tst.id, tst.vt_id
-              FROM CSC_TYPE_STREET   tst
+              FROM CSC_TYPE_STREET   tst -- "Источник"
              WHERE tst.vt_id IS NOT NULL)
   LOOP
+    -- "Целевая"
     UPDATE CSC_ADDRESS adr SET adr.vt_id = i.vt_id WHERE adr.tst_id = i.id;
   END LOOP;
 END;
 
 -- с использованием MERGE
-MERGE INTO CSC_ADDRESS adr
+MERGE INTO CSC_ADDRESS adr -- "Целевая"
 USING (SELECT tst.id, tst.vt_id
-         FROM CSC_TYPE_STREET tst
+         FROM CSC_TYPE_STREET tst -- "Источник"
         WHERE tst.vt_id IS NOT NULL) t
 ON (adr.tst_id = t.id)
 WHEN MATCHED THEN
