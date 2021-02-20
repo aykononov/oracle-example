@@ -29,15 +29,15 @@ DECLARE
   TYPE VT_ID_R IS RECORD (tst_id NUMBER, vt_id NUMBER);
   TYPE VT_ID_T IS TABLE OF VT_ID_R INDEX BY PLS_INTEGER;
   l_vt_id VT_ID_T;
-BEGIN
 
+BEGIN
   -- "Источник"
   SELECT tst.id, tst.vt_id BULK COLLECT
     INTO l_vt_id
     FROM CSC_TYPE_STREET  tst 
    WHERE tst.vt_id IS NOT NULL;
 
-    -- "Целевая"
+   -- "Целевая"
    FORALL i IN 1..l_vt_id.count SAVE EXCEPTIONS
    UPDATE CSC_ADDRESS adr
       SET adr.vt_id  = l_vt_id(i).vt_id
