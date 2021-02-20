@@ -5,7 +5,7 @@
 -- самый простой способ
 BEGIN
   FOR i IN (SELECT tst.id, tst.vt_id
-              FROM CSC_TYPE_STREET   tst -- Улицы (vt_id - Населенный пункт (МО)
+              FROM CSC_TYPE_STREET   tst
              WHERE tst.vt_id IS NOT NULL)
   LOOP
     UPDATE CSC_ADDRESS adr SET adr.vt_id = i.vt_id WHERE adr.tst_id = i.id;
@@ -15,7 +15,7 @@ END;
 -- с использованием MERGE
 MERGE INTO CSC_ADDRESS adr
 USING (SELECT tst.id, tst.vt_id
-         FROM CSC_TYPE_STREET tst -- Улицы (vt_id - Населенный пункт (МО)
+         FROM CSC_TYPE_STREET tst
         WHERE tst.vt_id IS NOT NULL) t
 ON (adr.tst_id = t.id)
 WHEN MATCHED THEN
@@ -45,7 +45,8 @@ BEGIN
 	       WHEN OTHERS THEN
 				 dbms_output.put_line(sqlerrm);
          dbms_output.put_line('Number of ERRORS: ' || SQL%BULK_EXCEPTIONS.COUNT);
-   FOR i IN 1..SQL%BULK_EXCEPTIONS.COUNT LOOP
+   FOR i IN 1..SQL%BULK_EXCEPTIONS.COUNT 
+   LOOP
       dbms_output.put_line('Error ' || i || ' occurred during iteration ' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX);
       dbms_output.put_line('Oracle error is ' ||SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
    END LOOP; 
