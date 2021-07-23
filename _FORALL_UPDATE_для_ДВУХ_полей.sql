@@ -54,3 +54,43 @@ EXCEPTION
    END LOOP; 
 
 END;
+
+--- С использованием типа Таблица -> типа Запись
+DECLARE
+    TYPE CLOSE_FIX_DATE_R IS RECORD(t_id DB_LOAN_PRODUCT.id%TYPE, r_value DB_LOAN_PRODUCT_PARAM.value%TYPE);
+    TYPE CLOSE_FIX_DATE_T IS TABLE OF CLOSE_FIX_DATE_R INDEX BY PLS_INTEGER;
+    l_cfd CLOSE_FIX_DATE_T;
+
+BEGIN
+    SELECT T.id, R.value
+      BULK COLLECT
+      INTO l_cfd
+      FROM DB_LOAN_PRODUCT T, DB_LOAN_PRODUCT_PARAM R
+     WHERE T.state NOT IN
+           ('DELIVERED', 'WAITING_DELIVERY', 'WAITING_PAY_INSURANCE', 'PAY_INSURANCE_COMPLETE', 'COMPLETE_WITHOUT_INSURANCE')
+       AND T.id = R.product_id
+       AND R.name = 'CLOSE_FIX_DATE'
+       AND T.update_date IS NULL
+       AND T.product_type = 'CREDIT_CARD'
+       AND TO_DATE(R.value, 'dd.MM.yyyy') < SYSDATE
+       AND ROWNUM <= 2500;
+
+    FORALL i IN 1 .. l_cfd.count SAVE EXCEPTIONS
+        UPDATE DB_LOAN_PRODUCT P
+           SET P.update_date = TO_DATE(l_cfd(i).r_value) + 1
+         WHERE P.id = l_cfd(i).t_id;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        NULL;
+
+    WHEN OTHERS THEN
+        dbms_output.put_line(SQLERRM);
+        dbms_output.put_line('Number of ERRORS: ' || SQL%BULK_EXCEPTIONS.COUNT);
+        FOR i IN 1 .. SQL%BULK_EXCEPTIONS.COUNT
+            LOOP
+                dbms_output.put_line('Error ' || i || ' occurred during iteration ' || SQL%BULK_EXCEPTIONS(i).ERROR_INDEX);
+                dbms_output.put_line('Oracle error is ' || SQLERRM(-SQL%BULK_EXCEPTIONS(i).ERROR_CODE));
+            END LOOP;
+END;
+
