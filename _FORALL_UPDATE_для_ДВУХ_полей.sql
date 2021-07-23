@@ -55,7 +55,7 @@ EXCEPTION
 
 END;
 
---- С использованием типа Таблица -> типа Запись
+--- В одной таблице нужно обновить в одном столбце дату из другого столбца с датой + 1 день
 DECLARE
     TYPE CLOSE_FIX_DATE_R IS RECORD(t_id DB_LOAN_PRODUCT.id%TYPE, r_value DB_LOAN_PRODUCT_PARAM.value%TYPE);
     TYPE CLOSE_FIX_DATE_T IS TABLE OF CLOSE_FIX_DATE_R INDEX BY PLS_INTEGER;
