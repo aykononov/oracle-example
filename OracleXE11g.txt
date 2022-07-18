@@ -1,0 +1,55 @@
+"Oracle 11g XE - начальная установка" пароль 12345678
+Destination Folder: C:\oraclexe\
+Oracle Home: C:\oraclexe\app\oracle\product\11.2.0\server\
+Oracle Base:C:\oraclexe\
+Port for 'Oracle Database Listener': 1521
+Port for 'Oracle Services for Microsoft Transaction Server': 2030
+Port for 'Oracle HTTP Listener': 8080
+
+"Изменить Port HTTP Listener" для Apex Get Started
+sqlplus.exe
+conn sys as sysdba
+Enter password: 12345678
+Exec DBMS_XDB.SETHTTPPORT(8081);
+
+"Разблокировать схему HR"
+sqlplus.exe
+alter user HR identified by hr account unlock;
+alter user HR identified by 12345;
+conn hr/12345
+
+"Переменные среды\Системные переменные":
+    Переменная      Значение                    
+    NLS_LANG        RUSSIAN_RUSSIA.CL8MSWIN1251
+    NLS_DATE_FORMAT DD.MM.YYYY HH24:MI:SS
+    TNS_ADMIN       C:\Oracle\18.0.0\dbhomeXE\network\admin
+    Path            C:\Oracle\18.0.0\dbhomeXE\bin
+    Path            C:\Oracle\18.0.0\dbhomeXE\jdk\bin
+    Path            C:\Oracle\18.0.0\dbhomeXE\jdbc\lib
+    CLASSPATH       C:\Oracle\18.0.0\dbhomeXE\jdbc\lib\ojdbc8.jar
+
+"C:\Oracle\18.0.0\dbhomeXE\sqlplus\glogin.sql"
+    define editor = v1
+    set serveroutput on Size unlimited
+    set trimspool on
+    set long 5000
+    set linesize 100
+    set pagesize 9999
+    column plan_plus_exp format a80
+    set sqlprompt '&_user.@&_connect_identifier.> '
+
+"C:\Oracle\18.0.0\dbhomeXE\bin\sqlplus.cmd"
+    @echo off
+    cls
+    echo "sql * plus.exe"
+    echo -------------------------
+    chcp 1251
+    rem sqlplus / as sysdba
+    sqlplus scott/tiger@139.45.250.130:1571/dev
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\ORACLE]
+    "NLS_LANG"="AMERICAN_AMERICA.CL8MSWIN1251" - !!!
+    "NLS_LANG"="RUSSIAN_RUSSIA.CL8MSWIN1251"
+    "NLS_LANG"="RUSSIAN_CIS.CL8MSWIN1251" 
+    "NLS_LANG"="RUSSIAN_AMERICA.CL8MSWIN1251"
+    "NLS_LANG"="AMERICAN_AMERICA.WE8MSWIN1252"
